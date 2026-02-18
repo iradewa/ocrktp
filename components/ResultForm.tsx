@@ -2,26 +2,28 @@
 import React, { useState, useEffect } from 'react';
 import { KTPData } from '../types';
 
-interface ResultFormProps {
-  data: KTPData | null;
-  loading: boolean;
-}
-
-const Field: React.FC<{ 
-  label: string; 
-  value: string; 
+interface FieldProps {
+  label: string;
+  value: string;
   placeholder?: string;
   className?: string;
   type?: string;
   isLarge?: boolean;
-}> = ({ label, value, placeholder = "-", className = "", type = "text", isLarge = false }) => {
+  onCopy: (text: string) => void;
+}
+
+const Field: React.FC<FieldProps> = ({ label, value, placeholder = "-", className = "", type = "text", isLarge = false, onCopy }) => {
   const [val, setVal] = useState(value);
   
   useEffect(() => {
     setVal(value);
   }, [value]);
 
-  const Component = isLarge ? "textarea" : "input";
+  const handleClick = () => {
+    if (val && val !== "-") {
+      onCopy(val);
+    }
+  };
 
   return (
     <div className={className}>
@@ -33,17 +35,19 @@ const Field: React.FC<{
           <textarea
             value={val}
             onChange={(e) => setVal(e.target.value)}
+            onClick={handleClick}
             placeholder={placeholder}
             rows={2}
-            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all resize-none"
+            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all resize-none cursor-pointer hover:bg-slate-100"
           />
         ) : (
           <input
             type={type}
             value={val}
             onChange={(e) => setVal(e.target.value)}
+            onClick={handleClick}
             placeholder={placeholder}
-            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all cursor-pointer hover:bg-slate-100"
           />
         )}
       </div>
@@ -55,7 +59,7 @@ const ResultForm: React.FC<ResultFormProps> = ({ data, loading }) => {
   const [copyStatus, setCopyStatus] = useState<string | null>(null);
 
   const handleCopy = (text: string | undefined) => {
-    if (!text) return;
+    if (!text || text === "" || text === "-") return;
     navigator.clipboard.writeText(text);
     setCopyStatus("Copied!");
     setTimeout(() => setCopyStatus(null), 2000);
@@ -95,27 +99,27 @@ const ResultForm: React.FC<ResultFormProps> = ({ data, loading }) => {
       </div>
 
       <div className="p-6 space-y-5 overflow-y-auto flex-1">
-        <Field label="Nomor Induk Kependudukan (NIK)" value={displayData.nik} />
-        <Field label="Nama Lengkap" value={displayData.nama} />
+        <Field label="Nomor Induk Kependudukan (NIK)" value={displayData.nik} onCopy={handleCopy} />
+        <Field label="Nama Lengkap" value={displayData.nama} onCopy={handleCopy} />
         
         <div className="grid grid-cols-2 gap-4">
-          <Field label="Tempat Lahir" value={displayData.tempatLahir} />
-          <Field label="Tanggal Lahir" value={displayData.tanggalLahir} placeholder="DD-MM-YYYY" />
+          <Field label="Tempat Lahir" value={displayData.tempatLahir} onCopy={handleCopy} />
+          <Field label="Tanggal Lahir" value={displayData.tanggalLahir} placeholder="DD-MM-YYYY" onCopy={handleCopy} />
         </div>
 
-        <Field label="Alamat" value={displayData.alamat} isLarge />
+        <Field label="Alamat" value={displayData.alamat} isLarge onCopy={handleCopy} />
 
         <div className="grid grid-cols-2 gap-4">
-          <Field label="Desa/Kelurahan" value={displayData.desaKelurahan} />
-          <Field label="Kecamatan" value={displayData.kecamatan} />
+          <Field label="Desa/Kelurahan" value={displayData.desaKelurahan} onCopy={handleCopy} />
+          <Field label="Kecamatan" value={displayData.kecamatan} onCopy={handleCopy} />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <Field label="Agama" value={displayData.agama} />
-          <Field label="Kodepos" value="" placeholder="Isi manual jika kosong" />
+          <Field label="Agama" value={displayData.agama} onCopy={handleCopy} />
+          <Field label="Kodepos" value="" placeholder="Isi manual jika kosong" onCopy={handleCopy} />
         </div>
 
-        <Field label="Pekerjaan" value={displayData.pekerjaan} />
+        <Field label="Pekerjaan" value={displayData.pekerjaan} onCopy={handleCopy} />
 
         <div className="pt-4 border-t border-dashed border-slate-200 mt-2">
           {/* Email suggestion field */}
@@ -135,9 +139,10 @@ const ResultForm: React.FC<ResultFormProps> = ({ data, loading }) => {
                 <input
                   type="text"
                   readOnly
+                  onClick={() => handleCopy(displayData.emailSaran)}
                   value={displayData.emailSaran}
                   placeholder="Menunggu data..."
-                  className="w-full pl-10 pr-4 py-2 bg-blue-50/50 border border-blue-100 rounded-lg text-slate-600 text-sm focus:outline-none"
+                  className="w-full pl-10 pr-4 py-2 bg-blue-50/50 border border-blue-100 rounded-lg text-slate-600 text-sm focus:outline-none cursor-pointer hover:bg-blue-100/50 transition-colors"
                 />
               </div>
               <button 
@@ -167,9 +172,10 @@ const ResultForm: React.FC<ResultFormProps> = ({ data, loading }) => {
                 <input
                   type="text"
                   readOnly
+                  onClick={() => handleCopy(displayData.noHpSaran)}
                   value={displayData.noHpSaran}
                   placeholder="08..."
-                  className="w-full pl-10 pr-4 py-2 bg-blue-50/50 border border-blue-100 rounded-lg text-slate-600 text-sm focus:outline-none"
+                  className="w-full pl-10 pr-4 py-2 bg-blue-50/50 border border-blue-100 rounded-lg text-slate-600 text-sm focus:outline-none cursor-pointer hover:bg-blue-100/50 transition-colors"
                 />
               </div>
               <button 
@@ -186,12 +192,17 @@ const ResultForm: React.FC<ResultFormProps> = ({ data, loading }) => {
       </div>
       
       {copyStatus && (
-        <div className="fixed bottom-8 right-8 bg-slate-800 text-white px-4 py-2 rounded-lg shadow-lg text-sm animate-bounce">
+        <div className="fixed bottom-8 right-8 bg-slate-800 text-white px-4 py-2 rounded-lg shadow-lg text-sm animate-bounce z-50">
           {copyStatus}
         </div>
       )}
     </div>
   );
 };
+
+interface ResultFormProps {
+  data: KTPData | null;
+  loading: boolean;
+}
 
 export default ResultForm;
