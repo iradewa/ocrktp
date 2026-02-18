@@ -1,0 +1,7 @@
+{
+  "name": "KTP OCR Extractor",
+  "description": "An Indonesian ID Card (KTP) OCR application that extracts data from uploaded images using Gemini AI, supporting various orientations and image qualities.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
